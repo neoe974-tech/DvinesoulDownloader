@@ -1,0 +1,13 @@
+venv/
+.venv/
+.buildozer/
+__pycache__/
+*.pyc
+bin/
+dist/
+build/
+*.apk
+*.aab
+
+android_build.log
+backup_checkpoint/
