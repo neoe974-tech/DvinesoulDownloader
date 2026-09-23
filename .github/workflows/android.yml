@@ -45,10 +45,10 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install buildozer "cython==0.29.37" packaging toml build sh colorama
 
-      - name: Prepare patched python-for-android
+      - name: Prepare patched python-for-android (pip/venv fix)
         run: |
           git clone https://github.com/kivy/python-for-android.git .github/p4a
-          git -C .github/p4a checkout 58d21141f17c889bf8585f5665921d72028f8831
+          git -C .github/p4a checkout 0382d27de2f7315ed98e74884bafb30365decdee
           P4A_DIR=.github/p4a python patch_p4a.py
 
       - name: Verify patched dependency handling
