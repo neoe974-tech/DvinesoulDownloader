@@ -1,88 +1,69 @@
 #:import dp kivy.metrics.dp
 
 <DvinesoulScreenManager>:
-
     SplashScreen:
         name: "splash"
-
-    HomeScreen:
-        name: "home"
-
     BrowserScreen:
         name: "browser"
-
     DownloadsScreen:
         name: "downloads"
-
     SettingsScreen:
         name: "settings"
 
-
 <SplashScreen>:
-
     canvas.before:
         Color:
             rgba: 0.015, 0.025, 0.035, 1
         Rectangle:
             pos: self.pos
             size: self.size
-
         Color:
-            rgba: 0.15, 0.25, 0.35, 0.12
+            rgba: 0.55, 1, 0.15, 0.04
         Ellipse:
-            pos: self.center_x - dp(170), self.center_y - dp(170)
-            size: dp(340), dp(340)
+            pos: self.center_x - dp(180), self.center_y - dp(180)
+            size: dp(360), dp(360)
 
     BoxLayout:
         orientation: "vertical"
         padding: dp(30)
-        spacing: dp(15)
-
+        spacing: dp(14)
         Widget:
-
         Label:
             text: "X-CORE"
-            font_size: dp(38)
+            font_size: dp(40)
             bold: True
             color: 0.55, 1, 0.15, 1
             size_hint_y: None
-            height: dp(55)
-
+            height: dp(58)
         Label:
             text: "DVINESOUL"
             font_size: dp(30)
             bold: True
             color: 1, 0.12, 0.18, 1
             size_hint_y: None
-            height: dp(45)
-
+            height: dp(46)
         Label:
             text: "DOWNLOADER"
             font_size: dp(22)
             bold: True
             color: 0.9, 0.92, 0.95, 1
             size_hint_y: None
-            height: dp(35)
-
+            height: dp(36)
         Widget:
-
         Label:
             text: "DVINESOUL DOWNLOADER"
-            font_size: dp(25)
+            font_size: dp(24)
             bold: True
             color: 0.9, 0.92, 0.95, 1
             size_hint_y: None
             height: dp(40)
-
         Label:
             text: "Created by Neo Emmanuel"
             font_size: dp(14)
             color: 0.55, 0.6, 0.68, 1
             size_hint_y: None
-            height: dp(30)
-
+            height: dp(28)
         Widget:
-
         Button:
             text: "START"
             size_hint_y: None
@@ -92,479 +73,193 @@
             font_size: dp(18)
             bold: True
             on_release: app.start_app()
-
         Label:
             text: "X-CORE • DVINESOUL"
             font_size: dp(11)
             color: 0.35, 0.4, 0.48, 1
             size_hint_y: None
             height: dp(25)
-
         Widget:
 
-
-<HomeScreen>:
-
+<BrowserScreen>:
     canvas.before:
         Color:
             rgba: 0.015, 0.025, 0.035, 1
         Rectangle:
             pos: self.pos
             size: self.size
-
         Color:
-            rgba: 0.55, 1, 0.15, 0.035
+            rgba: 0.55, 1, 0.15, 0.025
         Ellipse:
-            pos: self.width - dp(170), self.height - dp(180)
-            size: dp(300), dp(300)
+            pos: self.width - dp(180), self.height - dp(190)
+            size: dp(320), dp(320)
 
     BoxLayout:
         orientation: "vertical"
-        padding: dp(18)
-        spacing: dp(12)
+        padding: dp(12)
+        spacing: dp(8)
 
-        # HEADER
-        BoxLayout:
-            size_hint_y: None
-            height: dp(60)
-
-            BoxLayout:
-                orientation: "vertical"
-
-                Label:
-                    text: "DVINESOUL"
-                    font_size: dp(22)
-                    bold: True
-                    color: 0.55, 1, 0.15, 1
-                    halign: "left"
-                    text_size: self.size
-
-                Label:
-                    text: "DOWNLOADER"
-                    font_size: dp(13)
-                    color: 0.7, 0.72, 0.78, 1
-                    halign: "left"
-                    text_size: self.size
-
-            Label:
-                text: "⚙"
-                font_size: dp(28)
-                color: 0.85, 0.87, 0.9, 1
-                size_hint_x: None
-                width: dp(45)
-
-        # SEARCH
         BoxLayout:
             size_hint_y: None
             height: dp(52)
-            padding: dp(12)
-
-            canvas.before:
-                Color:
-                    rgba: 0.07, 0.09, 0.13, 1
-                RoundedRectangle:
-                    pos: self.pos
-                    size: self.size
-                    radius: [dp(12)]
-
-            Label:
-                text: "🔗  Search or enter YouTube URL"
-                font_size: dp(14)
-                color: 0.72, 0.76, 0.82, 1
-                halign: "left"
-                text_size: self.size
-
-            Label:
-                text: "→"
-                font_size: dp(25)
-                color: 0.55, 1, 0.15, 1
-                size_hint_x: None
-                width: dp(35)
-
-        Label:
-            text: "QUICK ACCESS"
-            font_size: dp(12)
-            bold: True
-            color: 0.55, 1, 0.15, 1
-            size_hint_y: None
-            height: dp(25)
-            halign: "left"
-            text_size: self.size
-
-        # QUICK ACCESS BUTTONS
-
-        Button:
-            text: "🔥   Trending                                      ›"
-            background_normal: ""
-            background_color: 0.07, 0.09, 0.13, 1
-            color: 0.9, 0.92, 0.95, 1
-            font_size: dp(15)
-            halign: "left"
-            on_release: root.open_browser()
-
-        Button:
-            text: "🎵   Music                                          ›"
-            background_normal: ""
-            background_color: 0.07, 0.09, 0.13, 1
-            color: 0.9, 0.92, 0.95, 1
-            font_size: dp(15)
-            halign: "left"
-            on_release: root.open_browser()
-
-        Button:
-            text: "🎮   Gaming                                         ›"
-            background_normal: ""
-            background_color: 0.07, 0.09, 0.13, 1
-            color: 0.9, 0.92, 0.95, 1
-            font_size: dp(15)
-            halign: "left"
-            on_release: root.open_browser()
-
-        Widget:
-
-        # WATERMARK
-        Label:
-            text: "X-CORE"
-            font_size: dp(48)
-            bold: True
-            color: 0.55, 1, 0.15, 0.045
-            size_hint_y: None
-            height: dp(70)
-
-        # NAVIGATION
-        BoxLayout:
-            size_hint_y: None
-            height: dp(65)
-            spacing: dp(4)
-
-            Button:
-                text: "⌂\nHome"
-                background_normal: ""
-                background_color: 0.55, 1, 0.15, 0.12
-                color: 0.55, 1, 0.15, 1
-
-            Button:
-                text: "◎\nBrowser"
-                background_normal: ""
-                background_color: 0.04, 0.06, 0.09, 1
-                color: 0.75, 0.78, 0.83, 1
-                on_release: root.manager.current = "browser"
-
-            Button:
-                text: "↓\nDownloads"
-                background_normal: ""
-                background_color: 0.04, 0.06, 0.09, 1
-                color: 0.75, 0.78, 0.83, 1
-                on_release: root.manager.current = "downloads"
-
-            Button:
-                text: "•••\nMore"
-                background_normal: ""
-                background_color: 0.04, 0.06, 0.09, 1
-                color: 0.75, 0.78, 0.83, 1
-                on_release: root.manager.current = "settings"
-
-
-<BrowserScreen>:
-    name: "browser"
-
-    BoxLayout:
-        orientation: "vertical"
-        padding: dp(16)
-        spacing: dp(10)
-
-        canvas.before:
-            Color:
-                rgba: 0.025, 0.025, 0.035, 1
-            Rectangle:
-                pos: self.pos
-                size: self.size
-
-        # Header
-        BoxLayout:
-            size_hint_y: None
-            height: dp(55)
-
             Label:
                 text: "X-CORE"
-                font_size: dp(20)
+                font_size: dp(22)
                 bold: True
-                color: 0.65, 1, 0.05, 1
+                color: 0.55, 1, 0.15, 1
                 halign: "left"
-
+                text_size: self.size
             Label:
-                text: "DVINESOUL"
-                font_size: dp(20)
-                bold: True
-                color: 0.9, 0.05, 0.08, 1
+                text: "DVINESOUL DOWNLOADER"
+                font_size: dp(13)
+                color: 0.9, 0.92, 0.95, 1
                 halign: "right"
+                text_size: self.size
 
-        Label:
-            text: "YOUTUBE DOWNLOADER"
-            font_size: dp(22)
-            bold: True
-            color: 1, 1, 1, 1
-            size_hint_y: None
-            height: dp(40)
-
-        # Search
         BoxLayout:
             size_hint_y: None
             height: dp(48)
-            spacing: dp(8)
-
+            spacing: dp(6)
             TextInput:
                 id: search_input
-                hint_text: "Search YouTube..."
+                hint_text: "Search YouTube"
                 multiline: False
                 background_normal: ""
-                background_color: 0.08, 0.08, 0.10, 1
-                foreground_color: 1, 1, 1, 1
-                cursor_color: 0.65, 1, 0.05, 1
-                padding: dp(12), dp(12)
-
+                background_color: 0.07, 0.09, 0.13, 1
+                foreground_color: 0.92, 0.94, 0.98, 1
+                cursor_color: 0.55, 1, 0.15, 1
+                padding: dp(12), dp(10)
                 on_text_validate: root.search_youtube()
-
             Button:
                 text: "SEARCH"
                 size_hint_x: None
                 width: dp(95)
                 background_normal: ""
-                background_color: 0.65, 1, 0.05, 1
-                color: 0, 0, 0, 1
+                background_color: 0.55, 1, 0.15, 1
+                color: 0.01, 0.02, 0.03, 1
                 bold: True
-
                 on_release: root.search_youtube()
 
         Label:
             id: search_status
-            text: "Search YouTube for a video"
-            font_size: dp(12)
-            color: 0.65, 0.65, 0.65, 1
+            text: "Search YouTube videos inside Dvinesoul Downloader."
             size_hint_y: None
-            height: dp(25)
+            height: dp(28)
+            font_size: dp(11)
+            color: 0.55, 0.6, 0.68, 1
             halign: "left"
-            text_size: self.width, None
+            text_size: self.size
 
-        # Search results
         ScrollView:
             do_scroll_x: False
-
             BoxLayout:
                 id: results_box
                 orientation: "vertical"
-                spacing: dp(8)
                 size_hint_y: None
                 height: self.minimum_height
+                spacing: dp(7)
 
-        # Download panel
         BoxLayout:
             id: download_panel
             orientation: "vertical"
-            spacing: dp(7)
-            padding: dp(10)
-
             size_hint_y: None
-            height: dp(205)
-
+            height: dp(170)
+            padding: dp(8)
+            spacing: dp(5)
             opacity: 0
             disabled: True
-
             canvas.before:
                 Color:
-                    rgba: 0.06, 0.06, 0.08, 1
+                    rgba: 0.05, 0.07, 0.10, 1
                 RoundedRectangle:
                     pos: self.pos
                     size: self.size
-                    radius: [dp(8)]
+                    radius: [dp(10)]
 
             Label:
                 id: selected_title
-                text: "No video selected"
-                font_size: dp(14)
+                text: "Select a video"
+                font_size: dp(12)
                 bold: True
                 color: 0.65, 1, 0.05, 1
                 halign: "left"
-                valign: "middle"
-                text_size: self.width, self.height
+                text_size: self.size
+
+            BoxLayout:
+                size_hint_y: None
+                height: dp(42)
+                spacing: dp(6)
+                ToggleButton:
+                    id: format_mp4
+                    text: "MP4"
+                    group: "format"
+                    background_normal: ""
+                    background_color: 0.85, 0.05, 0.08, 1
+                    on_release: root.choose_mp4()
+                ToggleButton:
+                    id: format_mp3
+                    text: "MP3"
+                    group: "format"
+                    background_normal: ""
+                    background_color: 0.85, 0.05, 0.08, 1
+                    on_release: root.choose_mp3()
+                Spinner:
+                    id: quality
+                    text: "Best available"
+                    values: ["Best available"]
+                    disabled: True
 
             Label:
-                text: "FORMAT"
-                font_size: dp(11)
-                color: 0.65, 0.65, 0.65, 1
-                size_hint_y: None
-                height: dp(18)
+                id: format_status
+                text: "Choose a format."
+                font_size: dp(10)
+                color: 0.6, 0.65, 0.72, 1
                 halign: "left"
+                text_size: self.size
 
             BoxLayout:
                 size_hint_y: None
                 height: dp(40)
-                spacing: dp(8)
-
-                ToggleButton:
-                    id: format_mp4
-                    text: "MP4"
-                    group: "download_format"
-                    state: "down"
-                    background_normal: ""
-                    background_color:
-                        (0.65, 1, 0.05, 1) if self.state == "down" else (0.15, 0.15, 0.18, 1)
-                    color:
-                        (0, 0, 0, 1) if self.state == "down" else (1, 1, 1, 1)
-
-                    on_release: root.choose_mp4()
-
-                ToggleButton:
-                    id: format_mp3
-                    text: "MP3"
-                    group: "download_format"
-                    background_normal: ""
-                    background_color:
-                        (0.65, 1, 0.05, 1) if self.state == "down" else (0.15, 0.15, 0.18, 1)
-                    color:
-                        (0, 0, 0, 1) if self.state == "down" else (1, 1, 1, 1)
-
-                    on_release: root.choose_mp3()
-
-            Label:
-                id: format_status
-                text: "Choose MP4 or MP3"
-                font_size: dp(11)
-                color: 0.75, 0.75, 0.75, 1
-                size_hint_y: None
-                height: dp(20)
-
-            BoxLayout:
-                size_hint_y: None
-                height: dp(42)
-                spacing: dp(8)
-
-                Label:
-                    text: "QUALITY"
-                    size_hint_x: None
-                    width: dp(70)
-                    color: 0.75, 0.75, 0.75, 1
-
-                Spinner:
-                    id: quality
-                    text: "Select quality"
-                    values: ["Select quality"]
-                    background_normal: ""
-                    background_color: 0.12, 0.12, 0.15, 1
-                    color: 1, 1, 1, 1
-                    disabled: False
-
-            BoxLayout:
-                size_hint_y: None
-                height: dp(42)
-                spacing: dp(8)
-
-                Button:
-                    text: "DOWNLOAD"
-                    background_normal: ""
-                    background_color: 0.85, 0.05, 0.08, 1
-                    color: 1, 1, 1, 1
-                    bold: True
-
-                    on_release: root.start_download()
-
+                spacing: dp(6)
                 Label:
                     id: download_status
                     text: ""
-                    font_size: dp(11)
-                    color: 0.65, 1, 0.05, 1
+                    font_size: dp(10)
+                    color: 0.55, 1, 0.15, 1
                     halign: "left"
-                    valign: "middle"
-                    text_size: self.width, self.height
+                    text_size: self.size
+                Button:
+                    id: download_button
+                    text: "START DOWNLOAD"
+                    size_hint_x: None
+                    width: dp(145)
+                    background_normal: ""
+                    background_color: 0.9, 0.08, 0.14, 1
+                    bold: True
+                    on_release: root.start_download()
 
-        # Bottom navigation
         BoxLayout:
             size_hint_y: None
             height: dp(48)
             spacing: dp(5)
-
             Button:
-                text: "HOME"
+                text: "BROWSER"
                 background_normal: ""
-                background_color: 0.12, 0.12, 0.15, 1
-                color: 1, 1, 1, 1
-                on_release: app.root.current = "home"
-
+                background_color: 0.55, 1, 0.15, 1
+                color: 0.01, 0.02, 0.03, 1
+                bold: True
             Button:
                 text: "DOWNLOADS"
                 background_normal: ""
-                background_color: 0.12, 0.12, 0.15, 1
-                color: 1, 1, 1, 1
-                on_release: app.root.current = "downloads"
-
+                background_color: 0.07, 0.09, 0.13, 1
+                on_release: root.go("downloads")
             Button:
                 text: "SETTINGS"
                 background_normal: ""
-                background_color: 0.12, 0.12, 0.15, 1
-                color: 1, 1, 1, 1
-                on_release: app.root.current = "settings"
-
+                background_color: 0.07, 0.09, 0.13, 1
+                on_release: root.go("settings")
 
 <DownloadsScreen>:
-    name: "downloads"
-
-    BoxLayout:
-        orientation: "vertical"
-        padding: dp(20)
-        spacing: dp(15)
-
-        canvas.before:
-            Color:
-                rgba: 0.025, 0.025, 0.035, 1
-            Rectangle:
-                pos: self.pos
-                size: self.size
-
-        Label:
-            text: "DVINESOUL DOWNLOADS"
-            font_size: dp(24)
-            bold: True
-            color: 0.65, 1, 0.05, 1
-            size_hint_y: None
-            height: dp(55)
-
-        ScrollView:
-            do_scroll_x: False
-
-            Label:
-                id: download_list
-                text: "No downloads yet"
-                font_size: dp(15)
-                color: 0.9, 0.9, 0.9, 1
-                halign: "left"
-                valign: "top"
-                text_size: self.width, None
-                size_hint_y: None
-                height: max(self.texture_size[1], dp(100))
-
-        Button:
-            text: "REFRESH DOWNLOADS"
-            size_hint_y: None
-            height: dp(50)
-            background_normal: ""
-            background_color: 0.85, 0.05, 0.08, 1
-            color: 1, 1, 1, 1
-            bold: True
-            on_release: root.refresh_downloads()
-
-        Button:
-            text: "BACK TO HOME"
-            size_hint_y: None
-            height: dp(50)
-            background_normal: ""
-            background_color: 0.65, 1, 0.05, 1
-            color: 0, 0, 0, 1
-            bold: True
-            on_release: app.root.current = "home"
-
-
-<SettingsScreen>:
-
     canvas.before:
         Color:
             rgba: 0.015, 0.025, 0.035, 1
@@ -572,142 +267,174 @@
             pos: self.pos
             size: self.size
 
-    ScrollView:
+    BoxLayout:
+        orientation: "vertical"
+        padding: dp(14)
+        spacing: dp(10)
 
-        BoxLayout:
-            orientation: "vertical"
-            padding: dp(18)
-            spacing: dp(10)
+        Label:
+            text: "DVINESOUL DOWNLOADS"
             size_hint_y: None
-            height: self.minimum_height
+            height: dp(50)
+            font_size: dp(22)
+            bold: True
+            color: 0.55, 1, 0.15, 1
 
+        Label:
+            id: download_status
+            text: "Ready."
+            size_hint_y: None
+            height: dp(30)
+            font_size: dp(11)
+            color: 0.65, 0.7, 0.78, 1
+            halign: "left"
+            text_size: self.size
+
+        ScrollView:
+            do_scroll_x: False
             Label:
-                text: "Settings"
-                font_size: dp(25)
-                bold: True
-                color: 0.9, 0.92, 0.95, 1
+                id: download_list
+                text: "No downloads yet."
                 size_hint_y: None
-                height: dp(55)
-                halign: "left"
-                text_size: self.size
-
-            Label:
-                text: "GENERAL"
-                font_size: dp(12)
-                bold: True
-                color: 0.55, 1, 0.15, 1
-                size_hint_y: None
-                height: dp(30)
-                halign: "left"
-                text_size: self.size
-
-            Button:
-                text: "Default Quality                         1080p   ›"
-                size_hint_y: None
-                height: dp(52)
-                background_normal: ""
-                background_color: 0.07, 0.09, 0.13, 1
-
-            Button:
-                text: "Default Format                          MP4    ›"
-                size_hint_y: None
-                height: dp(52)
-                background_normal: ""
-                background_color: 0.07, 0.09, 0.13, 1
-
-            Button:
-                text: "Download Location                              ›"
-                size_hint_y: None
-                height: dp(52)
-                background_normal: ""
-                background_color: 0.07, 0.09, 0.13, 1
-
-            Label:
-                text: "SUPPORT"
-                font_size: dp(12)
-                bold: True
-                color: 0.55, 1, 0.15, 1
-                size_hint_y: None
-                height: dp(35)
-                halign: "left"
-                text_size: self.size
-
-            Button:
-                text: "Help / Documentation                         ›"
-                size_hint_y: None
-                height: dp(52)
-                background_normal: ""
-                background_color: 0.07, 0.09, 0.13, 1
-
-            Button:
-                text: "Send Feedback                               ›"
-                size_hint_y: None
-                height: dp(52)
-                background_normal: ""
-                background_color: 0.07, 0.09, 0.13, 1
-
-            Button:
-                text: "Report a Problem                            ›"
-                size_hint_y: None
-                height: dp(52)
-                background_normal: ""
-                background_color: 0.07, 0.09, 0.13, 1
-
-            Label:
-                text: "DVINESOUL"
-                font_size: dp(12)
-                bold: True
-                color: 0.55, 1, 0.15, 1
-                size_hint_y: None
-                height: dp(35)
-                halign: "left"
-                text_size: self.size
-
-            Button:
-                text: "GitHub                                      ›"
-                size_hint_y: None
-                height: dp(52)
-                background_normal: ""
-                background_color: 0.07, 0.09, 0.13, 1
-
-            Button:
-                text: "Website                                    ›"
-                size_hint_y: None
-                height: dp(52)
-                background_normal: ""
-                background_color: 0.07, 0.09, 0.13, 1
-
-            Label:
-                text: "UPDATES"
-                font_size: dp(12)
-                bold: True
-                color: 0.55, 1, 0.15, 1
-                size_hint_y: None
-                height: dp(35)
-                halign: "left"
-                text_size: self.size
-
-            Button:
-                text: "Check for Updates                           ›"
-                size_hint_y: None
-                height: dp(52)
-                background_normal: ""
-                background_color: 0.07, 0.09, 0.13, 1
-
-            Label:
-                text: "ABOUT\\n\\nDvinesoul Downloader\\nCreated by Neo Emmanuel\\n\\nVersion 1.0.0"
-                font_size: dp(14)
-                color: 0.65, 0.68, 0.73, 1
-                size_hint_y: None
-                height: dp(130)
+                height: max(self.texture_size[1], dp(180))
+                text_size: self.width, None
                 halign: "left"
                 valign: "top"
-                text_size: self.size
+                font_size: dp(13)
+                color: 0.9, 0.92, 0.95, 1
+                padding: dp(8), dp(8)
 
+        Button:
+            text: "REFRESH DOWNLOADS"
+            size_hint_y: None
+            height: dp(48)
+            background_normal: ""
+            background_color: 0.55, 1, 0.15, 1
+            color: 0.01, 0.02, 0.03, 1
+            bold: True
+            on_release: root.refresh_downloads()
+
+        BoxLayout:
+            size_hint_y: None
+            height: dp(48)
+            spacing: dp(5)
             Button:
-                text: "⌂   HOME"
-                size_hint_y: None
-                height: dp(55)
+                text: "BROWSER"
                 background_normal: ""
                 background_color: 0.07, 0.09, 0.13, 1
-                on_release: root.manager.current = "home"
+                on_release: root.go("browser")
+            Button:
+                text: "DOWNLOADS"
+                background_normal: ""
+                background_color: 0.55, 1, 0.15, 1
+                color: 0.01, 0.02, 0.03, 1
+                bold: True
+            Button:
+                text: "SETTINGS"
+                background_normal: ""
+                background_color: 0.07, 0.09, 0.13, 1
+                on_release: root.go("settings")
+
+<SettingsScreen>:
+    canvas.before:
+        Color:
+            rgba: 0.015, 0.025, 0.035, 1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    BoxLayout:
+        orientation: "vertical"
+        padding: dp(14)
+        spacing: dp(8)
+
+        Label:
+            text: "DVINESOUL SETTINGS"
+            size_hint_y: None
+            height: dp(52)
+            font_size: dp(22)
+            bold: True
+            color: 0.55, 1, 0.15, 1
+
+        ScrollView:
+            do_scroll_x: False
+            BoxLayout:
+                orientation: "vertical"
+                size_hint_y: None
+                height: self.minimum_height
+                spacing: dp(7)
+
+                Label:
+                    text: "APP\nDvinesoul Downloader\nVersion 0.2.0"
+                    size_hint_y: None
+                    height: dp(75)
+                    halign: "left"
+                    valign: "middle"
+                    text_size: self.width, None
+                    color: 0.9, 0.92, 0.95, 1
+
+                Label:
+                    text: "DOWNLOADS\nMP4 video • MP3 audio\nQuality options are read from the selected video."
+                    size_hint_y: None
+                    height: dp(88)
+                    halign: "left"
+                    valign: "middle"
+                    text_size: self.width, None
+                    color: 0.75, 0.8, 0.88, 1
+
+                Label:
+                    text: "ANDROID STORAGE\nDownloads use Android app-specific external storage. This follows scoped-storage rules and does not require broad storage access."
+                    size_hint_y: None
+                    height: dp(105)
+                    halign: "left"
+                    valign: "middle"
+                    text_size: self.width, None
+                    color: 0.75, 0.8, 0.88, 1
+
+                Label:
+                    text: "PERMISSIONS\nInternet access is required for YouTube search and downloads. The app does not request MANAGE_EXTERNAL_STORAGE."
+                    size_hint_y: None
+                    height: dp(88)
+                    halign: "left"
+                    valign: "middle"
+                    text_size: self.width, None
+                    color: 0.75, 0.8, 0.88, 1
+
+                Label:
+                    text: "COMPATIBILITY\nARM64-v8a + ARMv7 (armeabi-v7a)\nAndroid API 24+ / target API 33"
+                    size_hint_y: None
+                    height: dp(75)
+                    halign: "left"
+                    valign: "middle"
+                    text_size: self.width, None
+                    color: 0.75, 0.8, 0.88, 1
+
+                Label:
+                    text: "CREATOR\nNeo Emmanuel • X-CORE • DVINESOUL"
+                    size_hint_y: None
+                    height: dp(65)
+                    halign: "left"
+                    valign: "middle"
+                    text_size: self.width, None
+                    color: 0.55, 1, 0.15, 1
+
+        BoxLayout:
+            size_hint_y: None
+            height: dp(48)
+            spacing: dp(5)
+            Button:
+                text: "BROWSER"
+                background_normal: ""
+                background_color: 0.07, 0.09, 0.13, 1
+                on_release: root.go("browser")
+            Button:
+                text: "DOWNLOADS"
+                background_normal: ""
+                background_color: 0.07, 0.09, 0.13, 1
+                on_release: root.go("downloads")
+            Button:
+                text: "SETTINGS"
+                background_normal: ""
+                background_color: 0.55, 1, 0.15, 1
+                color: 0.01, 0.02, 0.03, 1
+                bold: True
