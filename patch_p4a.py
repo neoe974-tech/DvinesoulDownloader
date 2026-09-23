@@ -14,11 +14,17 @@ if not root.exists():
 
 s = root.read_text()
 
+imports = "from urllib.parse import urlparse\n"
+needed = "from urllib.parse import urlparse\nfrom packaging.requirements import Requirement\nimport platform\n"
+
 if "from packaging.requirements import Requirement" not in s:
+    if imports not in s:
+        raise SystemExit("Expected urllib.parse import was not found.")
+    s = s.replace(imports, needed, 1)
+elif "import platform" not in s:
     s = s.replace(
-        "from urllib.parse import urlparse\n",
-        "from urllib.parse import urlparse\n"
         "from packaging.requirements import Requirement\n",
+        "from packaging.requirements import Requirement\nimport platform\n",
         1,
     )
 
