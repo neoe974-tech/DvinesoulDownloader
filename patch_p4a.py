@@ -1,5 +1,4 @@
 import os
-import platform
 from pathlib import Path
 
 p4a_dir = Path(os.environ.get(
@@ -14,13 +13,16 @@ if not root.exists():
 
 s = root.read_text()
 
-imports = "from urllib.parse import urlparse\n"
-needed = "from urllib.parse import urlparse\nfrom packaging.requirements import Requirement\nimport platform\n"
-
+# p4a evaluates PEP 508 markers while resolving dependencies.
 if "from packaging.requirements import Requirement" not in s:
-    if imports not in s:
+    marker_import = (
+        "from urllib.parse import urlparse\n"
+        "from packaging.requirements import Requirement\n"
+        "import platform\n"
+    )
+    if "from urllib.parse import urlparse\n" not in s:
         raise SystemExit("Expected urllib.parse import was not found.")
-    s = s.replace(imports, needed, 1)
+    s = s.replace("from urllib.parse import urlparse\n", marker_import, 1)
 elif "import platform" not in s:
     s = s.replace(
         "from packaging.requirements import Requirement\n",
@@ -28,13 +30,7 @@ elif "import platform" not in s:
         1,
     )
 
-if "req_name = parsed_req.name" in s and '"extra": "default"' in s:
-    print(f"p4a marker patch already applied: {root}")
-else:
-    old = '''                    req_name = get_package_name(new_req)
-'''
-
-    new = '''                    parsed_req = Requirement(new_req)
+marker_block = '''                    parsed_req = Requirement(new_req)
                     if parsed_req.marker is not None:
                         marker_env = {
                             "python_version": f"{sys.version_info.major}.{sys.version_info.minor}",
@@ -52,9 +48,24 @@ else:
                     req_name = parsed_req.name
 '''
 
-    if old not in s:
+old_simple = '''                    req_name = get_package_name(new_req)
+'''
+if "req_name = parsed_req.name" not in s:
+    if old_simple not in s:
         raise SystemExit("Expected p4a dependency code was not found.")
+    s = s.replace(old_simple, marker_block, 1)
 
-    s = s.replace(old, new, 1)
-    root.write_text(s)
-    print(f"p4a marker patch applied successfully: {root}")
+# charset-normalizer publishes a CPython wheel that p4a can attempt to carry
+# into Android, but that wheel is not Android-compatible. Requests treats this
+# package as an optional charset detector, so omit it from the Android bundle.
+exclude_block = '''                    if req_name.lower() == "charset-normalizer":
+                        continue
+'''
+anchor = "                    req_name = parsed_req.name\n"
+if exclude_block not in s:
+    if anchor not in s:
+        raise SystemExit("Expected patched dependency name assignment was not found.")
+    s = s.replace(anchor, anchor + exclude_block, 1)
+
+root.write_text(s)
+print(f"p4a dependency patch applied successfully: {root}")
