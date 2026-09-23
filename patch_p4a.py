@@ -68,4 +68,28 @@ if exclude_block not in s:
     s = s.replace(anchor, anchor + exclude_block, 1)
 
 root.write_text(s)
+
+# p4a's pip report resolver can reintroduce charset-normalizer after the
+# dependency graph has been resolved. Filter it at the final module list
+# before requirements.txt is generated.
+build_root = p4a_dir / "pythonforandroid/build.py"
+if not build_root.exists():
+    raise SystemExit(f"p4a build file not found: {build_root}")
+
+b = build_root.read_text()
+filter_anchor = """        mname = module["metadata"]["name"]
+        mver = module["metadata"]["version"]
+"""
+filter_block = """        mname = module["metadata"]["name"]
+        if mname.lower().replace("-", "_") == "charset_normalizer":
+            continue
+        mver = module["metadata"]["version"]
+"""
+if 'charset_normalizer' not in b:
+    if filter_anchor not in b:
+        raise SystemExit("Expected p4a module report loop was not found.")
+    b = b.replace(filter_anchor, filter_block, 1)
+
+build_root.write_text(b)
 print(f"p4a dependency patch applied successfully: {root}")
+print(f"p4a module filtering patch applied successfully: {build_root}")
