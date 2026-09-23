@@ -56,6 +56,12 @@ jobs:
           python -m py_compile .github/p4a/pythonforandroid/pythonpackage.py
           python -c "import sys; sys.path.insert(0,'.github/p4a'); from pythonforandroid.pythonpackage import get_package_dependencies; deps=get_package_dependencies('yt-dlp'); print('\\n'.join(sorted(deps))); assert not any('charset-normalizer' in d for d in deps), 'charset-normalizer unexpectedly present'"
 
+      - name: Configure Java 17
+        run: |
+          echo "JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64" >> "$GITHUB_ENV"
+          echo "/usr/lib/jvm/java-17-openjdk-amd64/bin" >> "$GITHUB_PATH"
+          java -version
+
       - name: Build APK
         run: |
           yes | buildozer -v android debug
