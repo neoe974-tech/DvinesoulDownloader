@@ -16,6 +16,7 @@ package.domain = com.dvinesoul
 
 # (str) Source code where the main.py live
 source.dir = .
+p4a.source_dir = .github/p4a
 
 # (list) Source files to include (leave empty to include all the files)
 source.include_exts = py,png,jpg,kv,atlas

@@ -11,3 +11,4 @@ build/
 
 android_build.log
 backup_checkpoint/
+.github/p4a/
