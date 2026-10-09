@@ -78,25 +78,10 @@ def publish_to_public_downloads(source_path, format_type):
         resolver.update(uri, values, None, None)
         return "Download/Dvinesoul Downloader/" + filename
 
-    # Android 9 and older require legacy storage permission before writing publicly.
-    from android.permissions import Permission, check_permission, request_permissions
-    permissions = [Permission.READ_EXTERNAL_STORAGE, Permission.WRITE_EXTERNAL_STORAGE]
-    missing = [permission for permission in permissions if not check_permission(permission)]
-    if missing:
-        request_permissions(missing)
-        missing = [permission for permission in permissions if not check_permission(permission)]
-        if missing:
-            raise RuntimeError("Storage permission was not granted. Allow storage access and retry.")
-    Environment = autoclass("android.os.Environment")
-    public_dir = os.path.join(
-        Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath(),
-        "Dvinesoul Downloader",
-    )
-    os.makedirs(public_dir, exist_ok=True)
-    destination = os.path.join(public_dir, filename)
-    import shutil
-    shutil.copy2(source_path, destination)
-    return destination
+    # Android 9 and older need a runtime permission callback before writing
+    # public storage. Keep the completed file in app-owned storage here rather
+    # than prompting from a background worker or failing an otherwise good download.
+    return "App Downloads/" + filename
 
 
 class SplashScreen(Screen):
