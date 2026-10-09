@@ -55,10 +55,10 @@ if "req_name = parsed_req.name" not in s:
         raise SystemExit("Expected p4a dependency code was not found.")
     s = s.replace(old_simple, marker_block, 1)
 
-# charset-normalizer publishes a CPython wheel that p4a can attempt to carry
-# into Android, but that wheel is not Android-compatible. Requests treats this
-# package as an optional charset detector, so omit it from the Android bundle.
-exclude_block = '''                    if req_name.lower() == "charset-normalizer":
+# python-for-android's pip report resolver can pull requests and its optional
+# charset-normalizer dependency into the Android build. yt-dlp uses urllib by
+# default, so omit these optional HTTP packages to avoid an incompatible wheel.
+exclude_block = '''                    if req_name.lower().replace("_", "-") in ("charset-normalizer", "requests"):
                         continue
 '''
 anchor = "                    req_name = parsed_req.name\n"
@@ -85,10 +85,15 @@ filter_block = """        mname = module["metadata"]["name"]
             continue
         mver = module["metadata"]["version"]
 """
-if 'charset_normalizer' not in b:
+if 'charset_normalizer' not in b or 'requests' not in b:
     if filter_anchor not in b:
         raise SystemExit("Expected p4a module report loop was not found.")
     b = b.replace(filter_anchor, filter_block, 1)
+    b = b.replace(
+        'if mname.lower().replace("-", "_") == "charset_normalizer":',
+        'if mname.lower().replace("-", "_") in ("charset_normalizer", "requests"):',
+        1,
+    )
 
 build_root.write_text(b)
 print(f"p4a dependency patch applied successfully: {root}")
