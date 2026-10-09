@@ -363,6 +363,33 @@ class BrowserScreen(Screen):
         else:
             selector = "bestaudio/best"
 
+        # Android 9 and older require runtime storage access for public Downloads.
+        # Request it at point of use, and resume only after the user grants it.
+        if is_android() and android_api_level() < 29 and not legacy_storage_permission_granted():
+            self.ids.download_status.text = "Storage permission is required on this Android version."
+            try:
+                from android.permissions import request_permissions
+                required = [
+                    "android.permission.READ_EXTERNAL_STORAGE",
+                    "android.permission.WRITE_EXTERNAL_STORAGE",
+                ]
+
+                def permission_result(permissions, grant_results):
+                    granted = bool(grant_results) and all(bool(value) for value in grant_results)
+                    def finish_request(_dt):
+                        if granted:
+                            self.start_download()
+                        else:
+                            self.ids.download_status.text = (
+                                "Storage permission denied. Allow storage access in Android settings, then retry."
+                            )
+                    Clock.schedule_once(finish_request, 0)
+
+                request_permissions(required, permission_result)
+            except Exception as error:
+                self.ids.download_status.text = f"Could not request storage permission: {error}"
+            return
+
         # Resolve Android paths on the UI thread. PyJNIus calls from a
         # background Python thread can fail or terminate the Android app.
         try:
