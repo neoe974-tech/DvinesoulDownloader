@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main
+      - stable-sep23-passing-build
 
 jobs:
   build:
