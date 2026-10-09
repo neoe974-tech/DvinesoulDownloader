@@ -11,7 +11,13 @@ import mimetypes
 
 
 def is_android():
-    return "android" in sys.platform
+    # CPython bundled by python-for-android can report sys.platform="linux".
+    # Kivy's platform detector correctly identifies Android in that environment.
+    try:
+        from kivy.utils import platform
+        return platform == "android"
+    except Exception:
+        return "android" in sys.platform or "ANDROID_ARGUMENT" in os.environ
 
 
 def android_api_level():
