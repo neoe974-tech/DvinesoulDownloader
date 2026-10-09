@@ -6,34 +6,52 @@ from yt_dlp import YoutubeDL
 import os
 import threading
 import sys
+import glob
+import time
+from android_storage import app_staging_dir, publish_to_public_downloads, list_public_downloads, android_api_level, is_android
 
 
 APP_VERSION = "0.2.0"
 
 
 def android_download_dir():
-    if "android" not in sys.platform:
-        return os.path.expanduser("~/Downloads")
+    """Return the private staging folder used before publishing to Downloads."""
+    return app_staging_dir()
 
+
+def request_android_permissions():
+    """Request only permissions needed for the current Android version."""
+    if not is_android():
+        return
     try:
-        from jnius import autoclass
-        PythonActivity = autoclass("org.kivy.android.PythonActivity")
-        Environment = autoclass("android.os.Environment")
-        context = PythonActivity.mActivity
-        directory = context.getExternalFilesDir(
-            Environment.DIRECTORY_DOWNLOADS
-        )
-        if directory:
-            path = directory.getAbsolutePath()
-            os.makedirs(path, exist_ok=True)
-            return path
-    except Exception:
-        pass
+        api = android_api_level()
+        from android.permissions import request_permissions
+        permissions = []
+        if api >= 33:
+            permissions.append("android.permission.POST_NOTIFICATIONS")
+        if api < 29:
+            permissions.extend([
+                "android.permission.READ_EXTERNAL_STORAGE",
+                "android.permission.WRITE_EXTERNAL_STORAGE",
+            ])
+        if permissions:
+            request_permissions(permissions)
+    except Exception as error:
+        # Permission prompts must not prevent the app from opening.
+        print("Android permission request could not be started:", error)
 
-    return os.path.join(
-        os.path.expanduser("~"),
-        "Downloads"
-    )
+
+def legacy_storage_permission_granted():
+    if not is_android() or android_api_level() >= 29:
+        return True
+    try:
+        from android.permissions import check_permission
+        return (
+            check_permission("android.permission.WRITE_EXTERNAL_STORAGE")
+            and check_permission("android.permission.READ_EXTERNAL_STORAGE")
+        )
+    except Exception:
+        return False
 
 
 class SplashScreen(Screen):
@@ -355,6 +373,7 @@ class BrowserScreen(Screen):
             return None
 
     def _download_worker(self, url, format_type, selector, download_path):
+        started_at = time.time()
         try:
             os.makedirs(download_path, exist_ok=True)
 
@@ -380,11 +399,36 @@ class BrowserScreen(Screen):
 
             with YoutubeDL(options) as ydl:
                 info = ydl.extract_info(url, download=True)
+                expected_path = ydl.prepare_filename(info)
+
+            # yt-dlp's audio postprocessor changes the extension after download.
+            if format_type == "mp3":
+                expected_path = os.path.splitext(expected_path)[0] + ".mp3"
+            elif not os.path.isfile(expected_path):
+                expected_path = os.path.splitext(expected_path)[0] + ".mp4"
+
+            candidates = []
+            if os.path.isfile(expected_path):
+                candidates = [expected_path]
+            else:
+                for candidate in glob.glob(os.path.join(download_path, "*")):
+                    try:
+                        if os.path.isfile(candidate) and os.path.getmtime(candidate) >= started_at - 2:
+                            if os.path.splitext(candidate)[1].lower() in (".mp3", ".mp4", ".m4a", ".webm"):
+                                candidates.append(candidate)
+                    except OSError:
+                        continue
+            if not candidates:
+                raise OSError("Download completed but the output file could not be located.")
+
+            published = []
+            for candidate in candidates:
+                published.append(publish_to_public_downloads(candidate))
 
             title = info.get("title", "Video")
             Clock.schedule_once(
-                lambda dt, t=title, f=format_type, p=download_path:
-                self._download_success(t, f, p)
+                lambda dt, t=title, f=format_type, p=download_path, out=published:
+                self._download_success(t, f, p, out)
             )
         except Exception as error:
             self._schedule_error(
@@ -409,11 +453,11 @@ class BrowserScreen(Screen):
     def _update_progress(self, percent):
         self.ids.download_status.text = f"Downloading... {percent:.1f}%"
 
-    def _download_success(self, title, format_type, path):
+    def _download_success(self, title, format_type, path, published=None):
         self.download_active = False
         self.ids.download_button.disabled = False
         self.ids.download_status.text = (
-            f"{format_type.upper()} complete: {title}"
+            f"{format_type.upper()} saved to public Downloads: {title}"
         )
 
         downloads = self.manager.get_screen("downloads")
@@ -461,27 +505,8 @@ class DownloadsScreen(Screen):
         error_message = ""
 
         try:
-            if not os.path.isdir(path):
-                os.makedirs(path, exist_ok=True)
-
-            with os.scandir(path) as entries:
-                for entry in entries:
-                    try:
-                        if not entry.is_file(follow_symlinks=False):
-                            continue
-                        ext = os.path.splitext(entry.name)[1].lower()
-                        if ext not in (".mp3", ".mp4", ".m4a", ".webm"):
-                            continue
-                        stat = entry.stat(follow_symlinks=False)
-                        items.append({
-                            "name": entry.name,
-                            "size": stat.st_size,
-                            "mtime": stat.st_mtime,
-                        })
-                    except (OSError, ValueError):
-                        continue
-
-            items.sort(key=lambda x: x["mtime"], reverse=True)
+            # MediaStore query on Android 10+, filesystem listing elsewhere.
+            items = list_public_downloads()
         except (OSError, PermissionError) as error:
             error_message = str(error) or "Storage could not be read."
         except Exception as error:
@@ -539,7 +564,9 @@ class SettingsScreen(Screen):
         self.manager.current = screen
 
     def storage_description(self):
-        return android_download_dir()
+        if is_android():
+            return "Public Downloads/Dvinesoul Downloader"
+        return os.path.join(os.path.expanduser("~"), "Downloads")
 
 
 class DvinesoulScreenManager(ScreenManager):
@@ -552,6 +579,7 @@ class DvinesoulDownloaderApp(App):
 
     def build(self):
         Builder.load_file("main.kv")
+        Clock.schedule_once(lambda dt: request_android_permissions(), 1)
         return DvinesoulScreenManager()
 
     def start_app(self):
