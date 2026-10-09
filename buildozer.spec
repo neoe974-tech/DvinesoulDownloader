@@ -13,7 +13,8 @@ fullscreen = 0
 # The app stores its own downloads in Android app-specific external storage.
 # This avoids broad filesystem access and MANAGE_EXTERNAL_STORAGE.
 android.permissions = android.permission.INTERNET,android.permission.READ_EXTERNAL_STORAGE,android.permission.WRITE_EXTERNAL_STORAGE
-# Legacy storage permissions are used only on Android 9 and older; Android 10+ uses MediaStore.
+# Legacy permissions support older Android versions. Android 10+ publishes downloads through MediaStore.
+# Downloads are staged in app-owned storage so the app itself never needs all-files access.
 android.api = 33
 android.minapi = 24
 android.ndk_api = 24
