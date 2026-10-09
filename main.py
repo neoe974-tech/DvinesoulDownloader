@@ -12,28 +12,91 @@ APP_VERSION = "0.2.0"
 
 
 def android_download_dir():
+    """Return app-owned staging storage; Android grants access without broad permissions."""
     if "android" not in sys.platform:
-        return os.path.expanduser("~/Downloads")
+        path = os.path.expanduser("~/Downloads")
+        os.makedirs(path, exist_ok=True)
+        return path
 
-    try:
-        from jnius import autoclass
-        PythonActivity = autoclass("org.kivy.android.PythonActivity")
-        Environment = autoclass("android.os.Environment")
-        context = PythonActivity.mActivity
-        directory = context.getExternalFilesDir(
-            Environment.DIRECTORY_DOWNLOADS
-        )
-        if directory:
-            path = directory.getAbsolutePath()
-            os.makedirs(path, exist_ok=True)
-            return path
-    except Exception:
-        pass
+    from jnius import autoclass
+    PythonActivity = autoclass("org.kivy.android.PythonActivity")
+    Environment = autoclass("android.os.Environment")
+    context = PythonActivity.mActivity
+    directory = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
+    if directory is None:
+        directory = context.getFilesDir()
+    path = directory.getAbsolutePath()
+    os.makedirs(path, exist_ok=True)
+    return path
 
-    return os.path.join(
-        os.path.expanduser("~"),
-        "Downloads"
+
+def publish_to_public_downloads(source_path, format_type):
+    """Copy a completed file into the user's public Downloads folder safely."""
+    if "android" not in sys.platform:
+        return source_path
+
+    from jnius import autoclass
+    PythonActivity = autoclass("org.kivy.android.PythonActivity")
+    BuildVersion = autoclass("android.os.Build$VERSION")
+    context = PythonActivity.mActivity
+    filename = os.path.basename(source_path)
+    mime_type = "audio/mpeg" if format_type == "mp3" else "video/mp4"
+
+    if BuildVersion.SDK_INT >= 29:
+        ContentValues = autoclass("android.content.ContentValues")
+        MediaStoreDownloads = autoclass("android.provider.MediaStore$Downloads")
+        MediaColumns = autoclass("android.provider.MediaStore$MediaColumns")
+        resolver = context.getContentResolver()
+        values = ContentValues()
+        values.put(MediaColumns.DISPLAY_NAME, filename)
+        values.put(MediaColumns.MIME_TYPE, mime_type)
+        values.put(MediaColumns.RELATIVE_PATH, "Download/Dvinesoul Downloader")
+        values.put(MediaColumns.IS_PENDING, 1)
+        uri = resolver.insert(MediaStoreDownloads.EXTERNAL_CONTENT_URI, values)
+        if uri is None:
+            raise RuntimeError("Android could not create the public download file")
+        output = None
+        try:
+            output = resolver.openOutputStream(uri)
+            if output is None:
+                raise RuntimeError("Android could not open the public download file")
+            with open(source_path, "rb") as source:
+                while True:
+                    chunk = source.read(64 * 1024)
+                    if not chunk:
+                        break
+                    output.write(chunk)
+            output.flush()
+        except Exception:
+            resolver.delete(uri, None, None)
+            raise
+        finally:
+            if output is not None:
+                output.close()
+        values = ContentValues()
+        values.put(MediaColumns.IS_PENDING, 0)
+        resolver.update(uri, values, None, None)
+        return "Download/Dvinesoul Downloader/" + filename
+
+    # Android 9 and older require legacy storage permission before writing publicly.
+    from android.permissions import Permission, check_permission, request_permissions
+    permissions = [Permission.READ_EXTERNAL_STORAGE, Permission.WRITE_EXTERNAL_STORAGE]
+    missing = [permission for permission in permissions if not check_permission(permission)]
+    if missing:
+        request_permissions(missing)
+        missing = [permission for permission in permissions if not check_permission(permission)]
+        if missing:
+            raise RuntimeError("Storage permission was not granted. Allow storage access and retry.")
+    Environment = autoclass("android.os.Environment")
+    public_dir = os.path.join(
+        Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath(),
+        "Dvinesoul Downloader",
     )
+    os.makedirs(public_dir, exist_ok=True)
+    destination = os.path.join(public_dir, filename)
+    import shutil
+    shutil.copy2(source_path, destination)
+    return destination
 
 
 class SplashScreen(Screen):
@@ -370,11 +433,24 @@ class BrowserScreen(Screen):
 
             with YoutubeDL(options) as ydl:
                 info = ydl.extract_info(url, download=True)
+                candidate = info.get("filepath") or ydl.prepare_filename(info)
 
+            # yt-dlp may report the pre-processed container; resolve the final output.
+            root, _ext = os.path.splitext(candidate)
+            final_path = root + (".mp3" if format_type == "mp3" else ".mp4")
+            if not os.path.isfile(final_path):
+                requested = info.get("requested_downloads") or []
+                possible = [item.get("filepath") for item in requested if item.get("filepath")]
+                possible.extend([candidate, root + ".m4a", root + ".webm"])
+                final_path = next((p for p in possible if p and os.path.isfile(p)), "")
+            if not final_path:
+                raise RuntimeError("Download finished, but the output file could not be located.")
+
+            public_location = publish_to_public_downloads(final_path, format_type)
             title = info.get("title", "Video")
             Clock.schedule_once(
-                lambda dt, t=title, f=format_type, p=download_path:
-                self._download_success(t, f, p)
+                lambda dt, t=title, f=format_type, p=download_path, pub=public_location:
+                self._download_success(t, f, p, pub)
             )
         except Exception as error:
             self._schedule_error(
@@ -399,11 +475,11 @@ class BrowserScreen(Screen):
     def _update_progress(self, percent):
         self.ids.download_status.text = f"Downloading... {percent:.1f}%"
 
-    def _download_success(self, title, format_type, path):
+    def _download_success(self, title, format_type, path, public_location=""):
         self.download_active = False
         self.ids.download_button.disabled = False
         self.ids.download_status.text = (
-            f"{format_type.upper()} complete: {title}"
+            f"{format_type.upper()} saved: {public_location or path}"
         )
 
         downloads = self.manager.get_screen("downloads")
@@ -428,13 +504,19 @@ class DownloadsScreen(Screen):
         self.download_path = path
 
     def refresh_downloads(self):
+        # Resolve Android/JNI storage paths on the UI thread; JNI calls from a
+        # raw Python worker thread can crash some Android builds.
         self.ids.download_status.text = "Refreshing downloads..."
+        try:
+            path = self.download_path or android_download_dir()
+        except Exception as error:
+            self.ids.download_status.text = f"Storage unavailable: {error}"
+            return
         threading.Thread(
-            target=self._scan_worker, daemon=True
+            target=self._scan_worker, args=(path,), daemon=True
         ).start()
 
-    def _scan_worker(self):
-        path = self.download_path or android_download_dir()
+    def _scan_worker(self, path):
         items = []
         error_message = ""
 
