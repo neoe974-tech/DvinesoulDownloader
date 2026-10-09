@@ -55,7 +55,7 @@ jobs:
       - name: Verify patched dependency handling
         run: |
           python -m py_compile .github/p4a/pythonforandroid/pythonpackage.py
-          python -c "import sys; sys.path.insert(0,'.github/p4a'); from pythonforandroid.pythonpackage import get_package_dependencies; deps=get_package_dependencies('yt-dlp'); print('\\n'.join(sorted(deps))); assert not any('charset-normalizer' in d for d in deps), 'charset-normalizer unexpectedly present'"
+          python -c "import re,sys; sys.path.insert(0,'.github/p4a'); from pythonforandroid.pythonpackage import get_package_dependencies; deps=get_package_dependencies('yt-dlp'); names=[re.split(r'[<>=!~;\\[]', d, 1)[0].strip().lower().replace('_','-') for d in deps]; print('\\n'.join(sorted(deps))); forbidden={'requests','charset-normalizer'}; found=forbidden.intersection(names); assert not found, f'optional Android-incompatible dependencies unexpectedly present: {sorted(found)}'"
 
       - name: Configure Java 17
         run: |
