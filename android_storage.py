@@ -149,10 +149,10 @@ def list_public_downloads():
         MediaStoreDownloads = autoclass("android.provider.MediaStore$Downloads")
         activity = PythonActivity.mActivity
         resolver = activity.getContentResolver()
-        projection = ["_display_name", "_size", "date_added", "relative_path"]
+        # Passing a null projection avoids Java String[] conversion issues in PyJNIus.
         cursor = resolver.query(
             MediaStoreDownloads.EXTERNAL_CONTENT_URI,
-            projection, None, None, "date_added DESC"
+            None, None, None, "date_added DESC"
         )
         items = []
         if cursor is None:
