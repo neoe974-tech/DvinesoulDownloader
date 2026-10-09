@@ -104,7 +104,8 @@ fullscreen = 0
 
 # (list) Permissions
 # (See https://python-for-android.readthedocs.io/en/latest/buildoptions.html for all the supported syntaxes and properties)
-android.permissions = android.permission.INTERNET
+# Public Downloads uses MediaStore on Android 10+. Legacy storage permissions are capped at Android 9.
+android.permissions = android.permission.INTERNET, android.permission.POST_NOTIFICATIONS, android.permission.READ_EXTERNAL_STORAGE: maxSdkVersion=28, android.permission.WRITE_EXTERNAL_STORAGE: maxSdkVersion=28
 
 # (list) features (adds uses-feature -tags to manifest)
 #android.features = android.hardware.usb.host
