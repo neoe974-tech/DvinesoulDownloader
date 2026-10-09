@@ -8,10 +8,29 @@ import threading
 import sys
 import glob
 import time
+import io
 from android_storage import app_staging_dir, publish_to_public_downloads, list_public_downloads, android_api_level, is_android
 
 
-APP_VERSION = "0.3.0"
+APP_VERSION = "0.3.1"
+
+
+class _QuietOutput:
+    """File-like sink for yt-dlp output on Android, where stdio may be wrapped."""
+
+    def write(self, value):
+        return len(value) if value is not None else 0
+
+    def flush(self):
+        return None
+
+    def isatty(self):
+        return False
+
+
+def ytdlp_output_options():
+    sink = _QuietOutput()
+    return {"out": sink, "err": sink}
 
 
 def android_download_dir():
@@ -83,6 +102,7 @@ class BrowserScreen(Screen):
     def _search_worker(self, query):
         try:
             options = {
+                **ytdlp_output_options(),
                 "quiet": True,
                 "no_warnings": True,
                 "extract_flat": True,
@@ -269,6 +289,7 @@ class BrowserScreen(Screen):
     def _quality_worker(self, url):
         try:
             with YoutubeDL({
+                **ytdlp_output_options(),
                 "quiet": True,
                 "no_warnings": True,
                 "skip_download": True,
@@ -378,6 +399,7 @@ class BrowserScreen(Screen):
             os.makedirs(download_path, exist_ok=True)
 
             options = {
+                **ytdlp_output_options(),
                 "format": selector,
                 "outtmpl": os.path.join(
                     download_path, "%(title)s.%(ext)s"
