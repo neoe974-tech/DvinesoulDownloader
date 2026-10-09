@@ -11,7 +11,7 @@ import time
 from android_storage import app_staging_dir, publish_to_public_downloads, list_public_downloads, android_api_level, is_android
 
 
-APP_VERSION = "0.2.0"
+APP_VERSION = "0.3.0"
 
 
 def android_download_dir():
