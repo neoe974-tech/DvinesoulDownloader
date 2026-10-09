@@ -55,10 +55,13 @@ if "req_name = parsed_req.name" not in s:
         raise SystemExit("Expected p4a dependency code was not found.")
     s = s.replace(old_simple, marker_block, 1)
 
-# charset-normalizer publishes a CPython wheel that p4a can attempt to carry
-# into Android, but that wheel is not Android-compatible. Requests treats this
-# package as an optional charset detector, so omit it from the Android bundle.
-exclude_block = '''                    if req_name.lower() == "charset-normalizer":
+# yt-dlp uses Python's urllib by default. Requests and charset-normalizer
+# are optional for the supported download flow, and the available
+# charset-normalizer wheel is not Android-compatible. Exclude both optional
+# packages during dependency graph resolution.
+exclude_block = '''                    if req_name.lower().replace("_", "-") in (
+                        "requests", "charset-normalizer"
+                    ):
                         continue
 '''
 anchor = "                    req_name = parsed_req.name\n"
@@ -81,7 +84,7 @@ filter_anchor = """        mname = module["metadata"]["name"]
         mver = module["metadata"]["version"]
 """
 filter_block = """        mname = module["metadata"]["name"]
-        if mname.lower().replace("-", "_") == "charset_normalizer":
+        if mname.lower().replace("-", "_") in ("requests", "charset_normalizer"):
             continue
         mver = module["metadata"]["version"]
 """
