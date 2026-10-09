@@ -20,6 +20,10 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Validate Python source
+        run: |
+          python -m py_compile main.py android_storage.py
+
       - name: Install system dependencies
         run: |
           sudo apt-get update
