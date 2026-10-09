@@ -324,6 +324,17 @@ class BrowserScreen(Screen):
         else:
             selector = "bestaudio/best"
 
+        # Resolve Android paths on the UI thread. PyJNIus calls from a
+        # background Python thread can fail or terminate the Android app.
+        try:
+            download_path = android_download_dir()
+            os.makedirs(download_path, exist_ok=True)
+        except Exception as error:
+            self.ids.download_status.text = (
+                f"Cannot access download folder: {error}"
+            )
+            return
+
         self.download_active = True
         self.ids.download_button.disabled = True
         self.ids.download_status.text = (
@@ -332,7 +343,7 @@ class BrowserScreen(Screen):
 
         threading.Thread(
             target=self._download_worker,
-            args=(url, format_type, selector),
+            args=(url, format_type, selector, download_path),
             daemon=True,
         ).start()
 
@@ -343,9 +354,8 @@ class BrowserScreen(Screen):
         except (ValueError, IndexError, AttributeError):
             return None
 
-    def _download_worker(self, url, format_type, selector):
+    def _download_worker(self, url, format_type, selector, download_path):
         try:
-            download_path = android_download_dir()
             os.makedirs(download_path, exist_ok=True)
 
             options = {
@@ -428,13 +438,25 @@ class DownloadsScreen(Screen):
         self.download_path = path
 
     def refresh_downloads(self):
+        # Resolve Android's app-owned directory on the UI thread, then pass
+        # the plain path string to the worker. This avoids JNI calls from
+        # the background scanner, which could crash the app on Android.
+        try:
+            path = self.download_path or android_download_dir()
+        except Exception as error:
+            self.ids.download_status.text = (
+                f"Cannot access download folder: {error}"
+            )
+            return
+
         self.ids.download_status.text = "Refreshing downloads..."
         threading.Thread(
-            target=self._scan_worker, daemon=True
+            target=self._scan_worker,
+            args=(path,),
+            daemon=True,
         ).start()
 
-    def _scan_worker(self):
-        path = self.download_path or android_download_dir()
+    def _scan_worker(self, path):
         items = []
         error_message = ""
 
