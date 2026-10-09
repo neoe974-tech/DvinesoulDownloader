@@ -23,7 +23,12 @@ The APK is built by GitHub Actions for `arm64-v8a` and `armeabi-v7a`.
 
 ## Download location and permissions
 
-The app uses Android's app-specific external Downloads directory when available. These files are app-owned and are not guaranteed to appear in the device's public `Download` folder. The current build requests Internet permission; it does not request broad shared-storage access.
+- Completed media is published to the phone's public **Downloads/Dvinesoul Downloader** folder.
+- Android 10 and newer use the **MediaStore Downloads API** and scoped storage. This avoids requesting broad storage access just to save files created by the app.
+- Android 9 and older use the public Downloads directory and request legacy read/write storage permission at runtime. Those legacy permissions are capped at API 28 in the manifest.
+- Android 13 and newer declare and request `POST_NOTIFICATIONS`. Denying notification permission should not block downloads.
+- The app does not request `READ_MEDIA_AUDIO` or `READ_MEDIA_VIDEO` because it only needs to publish and list media it creates itself; those permissions would grant broader access to the user's other media and are not required for this flow.
+- The in-app Downloads screen queries MediaStore on Android 10+ and lists this app's published items.
 
 ## Build
 
