@@ -10,11 +10,10 @@ requirements = python3,kivy,yt-dlp
 orientation = portrait
 fullscreen = 0
 
-# The app stores its own downloads in Android app-specific external storage.
-# This avoids broad filesystem access and MANAGE_EXTERNAL_STORAGE.
-android.permissions = android.permission.INTERNET,android.permission.READ_EXTERNAL_STORAGE,android.permission.WRITE_EXTERNAL_STORAGE
-# Legacy permissions support older Android versions. Android 10+ publishes downloads through MediaStore.
-# Downloads are staged in app-owned storage so the app itself never needs all-files access.
+# This app intentionally avoids broad storage permissions.
+# Android scoped-storage rules allow app-private files and MediaStore access
+# without declaring READ/WRITE_EXTERNAL_STORAGE for modern Android.
+android.permissions = android.permission.INTERNET
 android.api = 33
 android.minapi = 24
 android.ndk_api = 24
